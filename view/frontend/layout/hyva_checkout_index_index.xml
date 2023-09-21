@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="entity-form.field-renderers">
+            <block name="shipping.vat_id"
+                   as="vat_id">
+                <block name="shipping.vat_id.after"
+                       as="after"
+                       template="Vendic_HyvaCheckoutGeisswebEuvat::vat-id/validation-status.phtml" />
+            </block>
+        </referenceBlock>
+    </body>
+</page>

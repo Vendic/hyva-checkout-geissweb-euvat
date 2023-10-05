@@ -47,115 +47,119 @@ $initialCountryId = $magewire->address['country_id'] ?? '';
 </div>
 
 <script>
-    function initVatButton() {
-        return {
-            vatNumber: '<?= $escaper->escapeJs($initialValue) ?>',
-            countryId: '<?= $escaper->escapeJs($initialCountryId) ?>',
-            requestMessage: '',
-            vatIsValid: false,
-            showFrontendMessage: false,
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('initVatButton', () => {
+            return {
+                vatNumber: '<?= $escaper->escapeJs($initialValue) ?>',
+                countryId: '<?= $escaper->escapeJs($initialCountryId) ?>',
+                requestMessage: '',
+                vatIsValid: false,
+                showFrontendMessage: false,
 
-            get isVatNumberFilled() {
-                return this.vatNumber.length > 0;
-            },
+                get isVatNumberFilled() {
+                    return this.vatNumber.length > 0;
+                },
 
-            /**
-             * Get the country code from the VAT number
-             * @returns {string}
-             */
-            get countryCodeFromVatNumber() {
-                if (this.vatNumber.match(new RegExp('^[A-Z][A-Z]'))) {
-                    return this.vatNumber.substr(0,2).toUpperCase();
-                }
-                return '';
-            },
+                /**
+                 * Get the country code from the VAT number
+                 * @returns {string}
+                 */
+                get countryCodeFromVatNumber() {
+                    if (this.vatNumber.match(new RegExp('^[A-Z][A-Z]'))) {
+                        return this.vatNumber.substr(0, 2).toUpperCase();
+                    }
+                    return '';
+                },
 
-            /**
-             * Reset the validation
-             * @returns {void}
-             */
-            resetValidation() {
-                this.showFrontendMessage = false;
-                this.requestMessage = '';
-                this.vatIsValid = false;
-                this.refreshPrices();
-            },
-
-            /**
-             * Close frontend message with timout.
-             * @param timeout
-             * @returns {void}
-             */
-            closeMessage(timeout = 10000) {
-                setTimeout(() => {
+                /**
+                 * Reset the validation
+                 * @returns {void}
+                 */
+                resetValidation() {
                     this.showFrontendMessage = false;
                     this.requestMessage = '';
-                }, timeout);
-            },
+                    this.vatIsValid = false;
+                    this.refreshPrices();
+                },
 
-            showInvalidCountryMessage() {
-                this.vatIsValid = false;
-                this.requestMessage = '<?= $escaper->escapeJs(__('The country code from the VAT number does not match the selected country.')->render()) ?>';
-                this.showFrontendMessage = true;
-                this.refreshPrices();
-            },
+                /**
+                 * Close frontend message with timout.
+                 * @param timeout
+                 * @returns {void}
+                 */
+                closeMessage(timeout = 10000) {
+                    setTimeout(() => {
+                        this.showFrontendMessage = false;
+                        this.requestMessage = '';
+                    }, timeout);
+                },
 
-            refreshPrices() {
-                //Trigger update order total summary
-                setTimeout(() => {
-                    Magewire.emitTo('price-summary.total-segments', 'refresh');
-                }, <?= $escaper->escapeJs($magewire->getAutoSaveTimeout()) ?>);
-            },
+                showInvalidCountryMessage() {
+                    this.vatIsValid = false;
+                    this.requestMessage = '<?= $escaper->escapeJs(
+                        __('The country code from the VAT number does not match the selected country.')->render()
+                    ) ?>';
+                    this.showFrontendMessage = true;
+                    this.refreshPrices();
+                },
 
-            validate(vatNumber) {
-                this.vatNumber = vatNumber;
-                this.showFrontendMessage = false;
+                refreshPrices() {
+                    //Trigger update order total summary
+                    setTimeout(() => {
+                        Magewire.emitTo('price-summary.total-segments', 'refresh');
+                    }, <?= $escaper->escapeJs($magewire->getAutoSaveTimeout()) ?>);
+                },
 
-                if (!this.isVatNumberFilled) {
-                    return;
-                }
+                validate(vatNumber) {
+                    this.vatNumber = vatNumber;
+                    this.showFrontendMessage = false;
 
-                if (this.countryCodeFromVatNumber !== this.countryId) {
-                    this.showInvalidCountryMessage();
-                    return;
-                }
+                    if (!this.isVatNumberFilled) {
+                        return;
+                    }
 
-                console.debug(`Start VAT validation ${this.vatNumber} for country ${this.countryId}`);
+                    if (this.countryCodeFromVatNumber !== this.countryId) {
+                        this.showInvalidCountryMessage();
+                        return;
+                    }
 
-                const requestUrl = `${BASE_URL}euvat/vatnumber/validation`;
-                const params = new URLSearchParams({
-                    form_key: hyva.getFormKey(),
-                    vat_number: this.vatNumber,
-                    handle: 'hyva_front'
-                });
+                    console.debug(`Start VAT validation ${this.vatNumber} for country ${this.countryId}`);
 
-                fetch(requestUrl + '?' + params, {
-                    headers: {'X-Requested-With': 'XMLHttpRequest'},
-                    method: 'GET',
-                    mode: 'cors',
-                    credentials: 'include'
-                })
-                    .then(response => {
-                        if (!response.ok) console.warn('GET request failed');
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.debug(data);
-                        if (data.request_message !== undefined) {
-                            this.requestMessage = data.request_message;
-                        }
-                        if (data.vat_is_valid !== undefined) {
-                            this.vatIsValid = data.vat_is_valid;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    })
-                    .finally(() => {
-                        this.showFrontendMessage = true;
-                        this.refreshPrices();
+                    const requestUrl = `${BASE_URL}euvat/vatnumber/validation`;
+                    const params = new URLSearchParams({
+                        form_key: hyva.getFormKey(),
+                        vat_number: this.vatNumber,
+                        handle: 'hyva_front'
                     });
-            }
-        };
-    }
+
+                    fetch(requestUrl + '?' + params, {
+                        headers: {'X-Requested-With': 'XMLHttpRequest'},
+                        method: 'GET',
+                        mode: 'cors',
+                        credentials: 'include'
+                    })
+                        .then(response => {
+                            if (!response.ok) console.warn('GET request failed');
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.debug(data);
+                            if (data.request_message !== undefined) {
+                                this.requestMessage = data.request_message;
+                            }
+                            if (data.vat_is_valid !== undefined) {
+                                this.vatIsValid = data.vat_is_valid;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        })
+                        .finally(() => {
+                            this.showFrontendMessage = true;
+                            this.refreshPrices();
+                        });
+                }
+            };
+        });
+    });
 </script>

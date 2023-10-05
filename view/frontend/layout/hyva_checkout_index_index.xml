@@ -10,5 +10,10 @@
                        template="Vendic_HyvaCheckoutGeisswebEuvat::vat-id/validation-status.phtml" />
             </block>
         </referenceBlock>
+
+        <referenceContainer name="hyva.checkout.container">
+            <block name="shipping.vat_id.js"
+                   template="Vendic_HyvaCheckoutGeisswebEuvat::vat-id/validation-status-js.phtml" />
+        </referenceContainer>
     </body>
 </page>

@@ -11,12 +11,19 @@
 /** @var \Hyva\Theme\ViewModel\HeroiconsOutline $heroIcons */
 $heroIcons = $viewModels->require(\Hyva\Theme\ViewModel\HeroiconsOutline::class);
 
-$initialValue = $magewire->address['vat_id'] ?? '';
-$initialCountryId = $magewire->address['country_id'] ?? '';
+// Note: the JS functions referenced in this alpine component can be found in validation-status-js.phtml.
+// The reason thay are seperated is because this component gets hidden by magewire based on conditions (see
+// ShippingAdddressModifiers). By placing the JS in a seperate file, that's always loaded we avoid any errors.
+
 ?>
-<div id="vat-request-button"
+<div id="vat-request-status"
      x-data="initVatButton()"
-     x-init="$watch('showFrontendMessage', value => closeMessage());"
+     x-init="
+        $watch('showFrontendMessage', value => closeMessage());
+        vatNumber = '<?= $escaper->escapeJs($magewire->address['vat_id'] ?? '')?>';
+        countryId = '<?= $escaper->escapeJs($magewire->address['country_id'] ?? '')?>';
+        autoSaveTime = '<?= $escaper->escapeJs($magewire->getAutoSaveTimeout())?>';
+     "
      @country-id-changed.window="countryId = $event.detail; resetValidation()"
      @vat-id-changed.window="validate($event.detail)"
 >
@@ -45,121 +52,3 @@ $initialCountryId = $magewire->address['country_id'] ?? '';
         </div>
     </div>
 </div>
-
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('initVatButton', () => {
-            return {
-                vatNumber: '<?= $escaper->escapeJs($initialValue) ?>',
-                countryId: '<?= $escaper->escapeJs($initialCountryId) ?>',
-                requestMessage: '',
-                vatIsValid: false,
-                showFrontendMessage: false,
-
-                get isVatNumberFilled() {
-                    return this.vatNumber.length > 0;
-                },
-
-                /**
-                 * Get the country code from the VAT number
-                 * @returns {string}
-                 */
-                get countryCodeFromVatNumber() {
-                    if (this.vatNumber.match(new RegExp('^[A-Z][A-Z]'))) {
-                        return this.vatNumber.substr(0, 2).toUpperCase();
-                    }
-                    return '';
-                },
-
-                /**
-                 * Reset the validation
-                 * @returns {void}
-                 */
-                resetValidation() {
-                    this.showFrontendMessage = false;
-                    this.requestMessage = '';
-                    this.vatIsValid = false;
-                    this.refreshPrices();
-                },
-
-                /**
-                 * Close frontend message with timout.
-                 * @param timeout
-                 * @returns {void}
-                 */
-                closeMessage(timeout = 10000) {
-                    setTimeout(() => {
-                        this.showFrontendMessage = false;
-                        this.requestMessage = '';
-                    }, timeout);
-                },
-
-                showInvalidCountryMessage() {
-                    this.vatIsValid = false;
-                    this.requestMessage = '<?= $escaper->escapeJs(
-                        __('The country code from the VAT number does not match the selected country.')->render()
-                    ) ?>';
-                    this.showFrontendMessage = true;
-                    this.refreshPrices();
-                },
-
-                refreshPrices() {
-                    //Trigger update order total summary
-                    setTimeout(() => {
-                        Magewire.emitTo('price-summary.total-segments', 'refresh');
-                    }, <?= $escaper->escapeJs($magewire->getAutoSaveTimeout()) ?>);
-                },
-
-                validate(vatNumber) {
-                    this.vatNumber = vatNumber;
-                    this.showFrontendMessage = false;
-
-                    if (!this.isVatNumberFilled) {
-                        return;
-                    }
-
-                    if (this.countryCodeFromVatNumber !== this.countryId) {
-                        this.showInvalidCountryMessage();
-                        return;
-                    }
-
-                    console.debug(`Start VAT validation ${this.vatNumber} for country ${this.countryId}`);
-
-                    const requestUrl = `${BASE_URL}euvat/vatnumber/validation`;
-                    const params = new URLSearchParams({
-                        form_key: hyva.getFormKey(),
-                        vat_number: this.vatNumber,
-                        handle: 'hyva_front'
-                    });
-
-                    fetch(requestUrl + '?' + params, {
-                        headers: {'X-Requested-With': 'XMLHttpRequest'},
-                        method: 'GET',
-                        mode: 'cors',
-                        credentials: 'include'
-                    })
-                        .then(response => {
-                            if (!response.ok) console.warn('GET request failed');
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.debug(data);
-                            if (data.request_message !== undefined) {
-                                this.requestMessage = data.request_message;
-                            }
-                            if (data.vat_is_valid !== undefined) {
-                                this.vatIsValid = data.vat_is_valid;
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                        })
-                        .finally(() => {
-                            this.showFrontendMessage = true;
-                            this.refreshPrices();
-                        });
-                }
-            };
-        });
-    });
-</script>

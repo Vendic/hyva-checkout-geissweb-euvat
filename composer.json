@@ -2,7 +2,7 @@
     "name": "vendic/hyva-checkout-geissweb-euvat",
     "description": "Hyvä checkout compatibility module for Geissweb EUVAT",
     "require": {
-        "php": "~8.1.0",
+        "php": "~8.1.0|~8.2.0",
         "geissweb/module-euvat": "^1.19",
         "hyva-themes/magento2-hyva-checkout": "^1.1"
     },

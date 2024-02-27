@@ -19,13 +19,13 @@ $heroIcons = $viewModels->require(\Hyva\Theme\ViewModel\HeroiconsOutline::class)
 <div id="vat-request-status"
      x-data="initVatButton()"
      x-init="
-        $watch('showFrontendMessage', value => closeMessage());
         vatNumber = '<?= $escaper->escapeJs($magewire->address['vat_id'] ?? '')?>';
         countryId = '<?= $escaper->escapeJs($magewire->address['country_id'] ?? '')?>';
         autoSaveTime = '<?= $escaper->escapeJs($magewire->getAutoSaveTimeout())?>';
      "
      @country-id-changed.window="countryId = $event.detail; resetValidation()"
      @vat-id-changed.window="validate($event.detail)"
+     @close-vat-message.window="closeMessage()"
 >
     <div class="rounded-md p-4 my-2"
          :class="{'bg-green-50': vatIsValid, 'bg-red-50': ! vatIsValid}"
@@ -46,7 +46,7 @@ $heroIcons = $viewModels->require(\Hyva\Theme\ViewModel\HeroiconsOutline::class)
                    :class="{'text-green-800': vatIsValid, 'text-red-800': ! vatIsValid}"
                    class="text-sm font-medium"></p>
             </div>
-            <div class="ml-auto cursor-pointer" @click="closeMessage(0)">
+            <div class="ml-auto cursor-pointer" @click="closeMessage()">
                 <?= /* @noEscape */ $heroIcons->xHtml('h-5 w-5') ?>
             </div>
         </div>

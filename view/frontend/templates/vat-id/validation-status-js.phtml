@@ -45,11 +45,9 @@
                  * @param timeout
                  * @returns {void}
                  */
-                closeMessage(timeout = 10000) {
-                    setTimeout(() => {
-                        this.showFrontendMessage = false;
-                        this.requestMessage = '';
-                    }, timeout);
+                closeMessage() {
+                    this.showFrontendMessage = false;
+                    this.requestMessage = '';
                 },
 
                 showInvalidCountryMessage() {

@@ -23,7 +23,7 @@
                  * @returns {string}
                  */
                 get countryCodeFromVatNumber() {
-                    if (this.vatNumber.match(new RegExp('^[A-Z][A-Z]'))) {
+                    if (this.vatNumber.match(new RegExp('^[A-z][A-z]'))) {
                         return this.vatNumber.substr(0, 2).toUpperCase();
                     }
                     return '';

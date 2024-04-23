@@ -77,6 +77,7 @@ class ShipppingAddressModifiers implements EntityFormModifierInterface
             return;
         }
 
+        $vatIdField->setAttribute('oninput', 'this.value = this.value.toUpperCase()');
         $vatIdField->setAttribute('@keydown', '$dispatch(\'close-vat-message\')');
         $vatIdField->setAttribute('@change.debounce', '$dispatch(\'vat-id-changed\', $event.target.value)');
     }

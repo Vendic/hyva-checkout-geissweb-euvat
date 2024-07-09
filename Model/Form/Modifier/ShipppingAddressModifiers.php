@@ -13,8 +13,10 @@ use Hyva\Checkout\Model\Form\EntityFormModifierInterface;
 
 class ShipppingAddressModifiers implements EntityFormModifierInterface
 {
-    public function __construct(private Configuration $configuration)
-    {
+    public function __construct(
+        private Configuration $configuration,
+        public bool $isAlwaysShowVatField = false
+    ) {
     }
 
     public function apply(EntityFormInterface $form): EntityFormInterface
@@ -89,6 +91,10 @@ class ShipppingAddressModifiers implements EntityFormModifierInterface
      */
     public function applyHideVatIdFieldForMerchantCountry(EntityFormInterface $form): void
     {
+        if ($this->isAlwaysShowVatField) {
+            return;
+        }
+        
         $vatIdField = $form->getField('vat_id');
         /** @var CountryAttributeField|null $countryField */
         $countryField = $form->getField('country_id');

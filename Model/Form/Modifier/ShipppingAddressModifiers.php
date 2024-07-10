@@ -15,7 +15,7 @@ class ShipppingAddressModifiers implements EntityFormModifierInterface
 {
     public function __construct(
         private Configuration $configuration,
-        public bool $isAlwaysShowVatField = false
+        private bool $isAlwaysShowVatField = false
     ) {
     }
 

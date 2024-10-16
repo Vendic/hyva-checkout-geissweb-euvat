@@ -81,6 +81,7 @@ class ShipppingAddressModifiers implements EntityFormModifierInterface
 
         $vatIdField->setAttribute('@keydown', '$dispatch(\'close-vat-message\')');
         $vatIdField->setAttribute('@change.debounce', '$dispatch(\'vat-id-changed\', $event.target.value)');
+        $vatIdField->setAttribute('@keypress.debounce.300ms', 'onChange');
     }
 
     /**
@@ -94,7 +95,7 @@ class ShipppingAddressModifiers implements EntityFormModifierInterface
         if ($this->isAlwaysShowVatField) {
             return;
         }
-        
+
         $vatIdField = $form->getField('vat_id');
         /** @var CountryAttributeField|null $countryField */
         $countryField = $form->getField('country_id');

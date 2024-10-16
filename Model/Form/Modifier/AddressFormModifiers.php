@@ -11,7 +11,7 @@ use Hyva\Checkout\Model\Form\EntityField\EavEntityAddress\CountryAttributeField;
 use Hyva\Checkout\Model\Form\EntityFormInterface;
 use Hyva\Checkout\Model\Form\EntityFormModifierInterface;
 
-class ShipppingAddressModifiers implements EntityFormModifierInterface
+class AddressFormModifiers implements EntityFormModifierInterface
 {
     public function __construct(
         private Configuration $configuration,

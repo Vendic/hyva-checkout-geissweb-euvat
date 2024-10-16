@@ -16,7 +16,16 @@
         <arguments>
             <argument name="entityFormModifiers" xsi:type="array">
                 <item name="geissweb_shipping_form_modifiers" xsi:type="object">
-                    Vendic\HyvaCheckoutGeisswebEuvat\Model\Form\Modifier\ShipppingAddressModifiers
+                    Vendic\HyvaCheckoutGeisswebEuvat\Model\Form\Modifier\AddressFormModifiers
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Hyva\Checkout\Model\Form\EntityForm\EavAttributeBillingAddressForm">
+        <arguments>
+            <argument name="entityFormModifiers" xsi:type="array">
+                <item name="geissweb_billing_form_modifiers" xsi:type="object">
+                    Vendic\HyvaCheckoutGeisswebEuvat\Model\Form\Modifier\AddressFormModifiers
                 </item>
             </argument>
         </arguments>

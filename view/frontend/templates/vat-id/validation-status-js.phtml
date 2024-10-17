@@ -13,6 +13,7 @@
                 requestMessage: '',
                 vatIsValid: false,
                 showFrontendMessage: false,
+                isLoading: false,
 
                 get isVatNumberFilled() {
                     return this.vatNumber.length > 0;
@@ -37,6 +38,7 @@
                     this.showFrontendMessage = false;
                     this.requestMessage = '';
                     this.vatIsValid = false;
+                    this.isLoading = false;
                     this.refreshPrices();
                 },
 
@@ -47,6 +49,7 @@
                  */
                 closeMessage() {
                     this.showFrontendMessage = false;
+                    this.isLoading = false;
                     this.requestMessage = '';
                 },
 
@@ -63,6 +66,7 @@
                     //Trigger update order total summary
                     setTimeout(() => {
                         Magewire.emitTo('price-summary.total-segments', 'refresh');
+                        this.isLoading = false;
                     }, this.autoSaveTime);
                 },
 
@@ -79,7 +83,9 @@
                         return;
                     }
 
-                    console.debug(`Start VAT validation ${this.vatNumber} for country ${this.countryId}`);
+                    this.isLoading = true;
+                    this.showFrontendMessage = true;
+                    this.requestMessage = '<?= $escaper->escapeJs(__('Validating VAT number...')) ?>';
 
                     const requestUrl = `${BASE_URL}euvat/vatnumber/validation`;
                     const params = new URLSearchParams({
@@ -99,7 +105,6 @@
                             return response.json();
                         })
                         .then(data => {
-                            console.debug(data);
                             if (data.request_message !== undefined) {
                                 this.requestMessage = data.request_message;
                             }

@@ -83,8 +83,6 @@
                         return;
                     }
 
-                    console.debug(`Start VAT validation ${this.vatNumber} for country ${this.countryId}`);
-
                     this.isLoading = true;
                     this.showFrontendMessage = true;
                     this.requestMessage = '<?= $escaper->escapeJs(__('Validating VAT number...')) ?>';
@@ -107,7 +105,6 @@
                             return response.json();
                         })
                         .then(data => {
-                            console.debug(data);
                             if (data.request_message !== undefined) {
                                 this.requestMessage = data.request_message;
                             }

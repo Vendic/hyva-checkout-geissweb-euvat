@@ -105,10 +105,10 @@ class AddressFormModifiers implements EntityFormModifierInterface
             return;
         }
 
-        $isVatIdFieldVisible = $countryField->getValue() === $this->euvatConfiguration->getMerchantCountryCode() &&
+        $isVatIdHidden = $countryField->getValue() === $this->euvatConfiguration->getMerchantCountryCode() &&
             !$this->config->isVatIdFieldVisibleForMerchantCountry();
 
-        if ($isVatIdFieldVisible) {
+        if ($isVatIdHidden) {
             $vatIdField->hide();
         }
     }

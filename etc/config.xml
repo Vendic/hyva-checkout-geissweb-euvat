@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+    ~ Copyright (c) Vendic B.V https://vendic.nl/
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <euvat>
+            <hyva_checkout>
+                <display_vat_id_for_domestic_country>0</display_vat_id_for_domestic_country>
+            </hyva_checkout>
+        </euvat>
+    </default>
+</config>

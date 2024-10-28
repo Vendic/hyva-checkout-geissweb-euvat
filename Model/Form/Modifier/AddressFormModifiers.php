@@ -5,16 +5,18 @@
 
 namespace Vendic\HyvaCheckoutGeisswebEuvat\Model\Form\Modifier;
 
-use Geissweb\Euvat\Helper\Configuration;
+use Geissweb\Euvat\Helper\Configuration as EuVatConfiguration;
 use Hyva\Checkout\Model\Form\EntityField\EavAttributeField;
 use Hyva\Checkout\Model\Form\EntityField\EavEntityAddress\CountryAttributeField;
 use Hyva\Checkout\Model\Form\EntityFormInterface;
 use Hyva\Checkout\Model\Form\EntityFormModifierInterface;
+use Vendic\HyvaCheckoutGeisswebEuvat\Model\Config;
 
 class AddressFormModifiers implements EntityFormModifierInterface
 {
     public function __construct(
-        private Configuration $configuration,
+        private EuVatConfiguration $euvatConfiguration,
+        private Config $config,
         private bool $isAlwaysShowVatField = false
     ) {
     }
@@ -94,7 +96,7 @@ class AddressFormModifiers implements EntityFormModifierInterface
         if ($this->isAlwaysShowVatField) {
             return;
         }
-        
+
         $vatIdField = $form->getField('vat_id');
         /** @var CountryAttributeField|null $countryField */
         $countryField = $form->getField('country_id');
@@ -103,7 +105,10 @@ class AddressFormModifiers implements EntityFormModifierInterface
             return;
         }
 
-        if ($countryField->getValue() === $this->configuration->getMerchantCountryCode()) {
+        $isVatIdHidden = $countryField->getValue() === $this->euvatConfiguration->getMerchantCountryCode() &&
+            !$this->config->isVatIdFieldVisibleForMerchantCountry();
+
+        if ($isVatIdHidden) {
             $vatIdField->hide();
         }
     }
@@ -121,7 +126,7 @@ class AddressFormModifiers implements EntityFormModifierInterface
             return;
         }
 
-        if (in_array($countryField->getValue(), $this->configuration->getFieldVisibleCountries())) {
+        if (in_array($countryField->getValue(), $this->euvatConfiguration->getFieldVisibleCountries())) {
             return;
         }
 

@@ -118,6 +118,7 @@
                         .finally(() => {
                             this.showFrontendMessage = true;
                             this.refreshPrices();
+                            this.isLoading = false;
                         });
                 }
             };

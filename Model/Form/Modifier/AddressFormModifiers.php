@@ -14,6 +14,11 @@ use Vendic\HyvaCheckoutGeisswebEuvat\Model\Config;
 
 class AddressFormModifiers implements EntityFormModifierInterface
 {
+    private const VAT_ID_FIELD_NAME = 'vat_id';
+
+    private const EUVAT_VAT_ID_FIELD_TOOLTIP_XML_PATH = 'euvat/integration/field_tooltip';
+    private const EUVAT_VAT_ID_FIELD_PLACEHOLDER_XML_PATH = 'euvat/integration/field_placeholder';
+
     public function __construct(
         private EuVatConfiguration $euvatConfiguration,
         private Config $config,
@@ -23,6 +28,12 @@ class AddressFormModifiers implements EntityFormModifierInterface
 
     public function apply(EntityFormInterface $form): EntityFormInterface
     {
+        $form->registerModificationListener(
+            'applyVatIdFieldConfigs',
+            'form:build',
+            [$this, 'applyVatIdFieldConfigs']
+        );
+
         $form->registerModificationListener(
             'addCountrySelectListener',
             'form:build',
@@ -47,7 +58,30 @@ class AddressFormModifiers implements EntityFormModifierInterface
             [$this, 'applyHideVatIdField']
         );
 
+        $form->registerModificationListener(
+            'removeSpacesFromVatId',
+            sprintf('form:%s:updated', self::VAT_ID_FIELD_NAME),
+            [$this, 'removeSpacesFromVatId']
+        );
+
         return $form;
+    }
+
+    public function applyVatIdFieldConfigs(EntityFormInterface $form): void
+    {
+        /** @var EavAttributeField|null $vatIdField */
+        $vatIdField = $form->getField(self::VAT_ID_FIELD_NAME);
+        if (!$vatIdField) {
+            return;
+        }
+
+        if ($vatIdPlaceholder = $this->euvatConfiguration->getConfig(self::EUVAT_VAT_ID_FIELD_PLACEHOLDER_XML_PATH)) {
+            $vatIdField->setAttribute('placeholder', $vatIdPlaceholder);
+        }
+
+        if ($vatIdTooltip = $this->euvatConfiguration->getConfig(self::EUVAT_VAT_ID_FIELD_TOOLTIP_XML_PATH)) {
+            $vatIdField->setData('tooltip', $vatIdTooltip);
+        }
     }
 
     /**
@@ -76,7 +110,7 @@ class AddressFormModifiers implements EntityFormModifierInterface
     public function applyTriggerEventOnVatIdChange(EntityFormInterface $form): void
     {
         /** @var EavAttributeField|null $vatIdField */
-        $vatIdField = $form->getField('vat_id');
+        $vatIdField = $form->getField(self::VAT_ID_FIELD_NAME);
         if (!$vatIdField) {
             return;
         }
@@ -100,7 +134,7 @@ class AddressFormModifiers implements EntityFormModifierInterface
             return;
         }
 
-        $vatIdField = $form->getField('vat_id');
+        $vatIdField = $form->getField(self::VAT_ID_FIELD_NAME);
         /** @var CountryAttributeField|null $countryField */
         $countryField = $form->getField('country_id');
 
@@ -121,7 +155,7 @@ class AddressFormModifiers implements EntityFormModifierInterface
      */
     public function applyHideVatIdField(EntityFormInterface $form): void
     {
-        $vatIdField = $form->getField('vat_id');
+        $vatIdField = $form->getField(self::VAT_ID_FIELD_NAME);
         /** @var CountryAttributeField|null $countryField */
         $countryField = $form->getField('country_id');
 
@@ -134,5 +168,16 @@ class AddressFormModifiers implements EntityFormModifierInterface
         }
 
         $vatIdField->hide();
+    }
+
+    public function removeSpacesFromVatId(EntityFormInterface $form): void
+    {
+        /** @var EavAttributeField|null $vatIdField */
+        $vatIdField = $form->getField(self::VAT_ID_FIELD_NAME);
+        if (!$vatIdField) {
+            return;
+        }
+
+        $vatIdField->setValue(str_replace(' ', '', (string)$vatIdField->getValue()));
     }
 }

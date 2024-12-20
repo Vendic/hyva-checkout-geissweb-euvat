@@ -71,6 +71,7 @@
                 },
 
                 validate(vatNumber) {
+                    vatNumber = vatNumber.replaceAll(' ', '');
                     this.vatNumber = vatNumber;
                     this.showFrontendMessage = false;
 

@@ -117,9 +117,12 @@ class AddressFormModifiers implements EntityFormModifierInterface
 
         $vatIdField->setAttribute(
             '@keydown.debounce.300ms',
-            '$dispatch(\'close-vat-message\'); $dispatch(\'vat-id-changed\', $event.target.value)'
+            '$dispatch(\'close-vat-message\'); $event.target.value = $event.target.value.replaceAll(" ", ""); $dispatch(\'vat-id-changed\', $event.target.value)'
         );
-        $vatIdField->setAttribute('@change.debounce', '$dispatch(\'vat-id-changed\', $event.target.value)');
+        $vatIdField->setAttribute(
+            '@change.debounce',
+            '$event.target.value = $event.target.value.replaceAll(" ", ""); $dispatch(\'vat-id-changed\', $event.target.value)'
+        );
     }
 
     /**

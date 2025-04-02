@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /**
  * @copyright   Copyright (c) Vendic B.V https://vendic.nl/
  */
@@ -29,9 +32,9 @@ class AddressFormModifiers implements EntityFormModifierInterface
     public function apply(EntityFormInterface $form): EntityFormInterface
     {
         $form->registerModificationListener(
-            'applyVatIdFieldConfigs',
+            'initVatIdFieldData',
             'form:build',
-            [$this, 'applyVatIdFieldConfigs']
+            [$this, 'initVatIdFieldData']
         );
 
         $form->registerModificationListener(
@@ -67,13 +70,22 @@ class AddressFormModifiers implements EntityFormModifierInterface
         return $form;
     }
 
-    public function applyVatIdFieldConfigs(EntityFormInterface $form): void
+    public function initVatIdFieldData(EntityFormInterface $form): void
     {
         /** @var EavAttributeField|null $vatIdField */
         $vatIdField = $form->getField(self::VAT_ID_FIELD_NAME);
         if (!$vatIdField) {
             return;
         }
+
+        $vatValue = $vatIdField->getValue();
+        $country = $form->getField('country_id')?->getValue() ?: '';
+        $vatIdField->setAttributeForSection('wrapper', 'x-data', 'initVatButton');
+        $vatIdField->setAttributeForSection('wrapper', 'x-bind', 'handleEventListeners');
+        $vatIdField->setAttributeForSection('wrapper', 'x-init', 'initVatComponent');
+        $vatIdField->setAttributeForSection('wrapper', 'data-initial-vat', $vatValue);
+        $vatIdField->setAttributeForSection('wrapper', 'data-initial-country', $country);
+        $vatIdField->setAttributeForSection('wrapper', 'data-autosave-time', '3000');
 
         if ($vatIdPlaceholder = $this->euvatConfiguration->getConfig(self::EUVAT_VAT_ID_FIELD_PLACEHOLDER_XML_PATH)) {
             $vatIdField->setAttribute('placeholder', $vatIdPlaceholder);
@@ -98,7 +110,7 @@ class AddressFormModifiers implements EntityFormModifierInterface
             return;
         }
 
-        $countryField->setAttribute('@change', '$dispatch(\'country-id-changed\', $event.target.value)');
+        $countryField->setAttribute('@change', '$store.euVatMethods.dispatchCountryChange');
     }
 
     /**
@@ -115,14 +127,8 @@ class AddressFormModifiers implements EntityFormModifierInterface
             return;
         }
 
-        $vatIdField->setAttribute(
-            '@keydown.debounce.300ms',
-            '$dispatch(\'close-vat-message\'); $event.target.value = $event.target.value.replaceAll(" ", ""); $dispatch(\'vat-id-changed\', $event.target.value)'
-        );
-        $vatIdField->setAttribute(
-            '@change.debounce',
-            '$event.target.value = $event.target.value.replaceAll(" ", ""); $dispatch(\'vat-id-changed\', $event.target.value)'
-        );
+        $vatIdField->setAttribute('@keydown.debounce.300ms', 'vatIdChanged');
+        $vatIdField->setAttribute('@change.debounce', 'vatIdChanged');
     }
 
     /**

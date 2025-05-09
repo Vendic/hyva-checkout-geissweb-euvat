@@ -40,9 +40,9 @@ $autoSaveTimeout = $block->getData('auto_save_timeout') ?? $magewire->getAutoSav
                    :class="getFontClass"
                    class="text-sm font-medium"></p>
             </div>
-            <div class="ml-auto cursor-pointer" @click="closeMessage()">
+            <button type="button" class="ml-auto cursor-pointer" @click.stop="closeMessage">
                 <?= /* @noEscape */ $heroIcons->xHtml('h-5 w-5') ?>
-            </div>
+            </button>
         </div>
     </div>
 </div>

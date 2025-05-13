@@ -17,28 +17,18 @@ $heroIcons = $viewModels->require(\Hyva\Theme\ViewModel\HeroiconsOutline::class)
 
 $autoSaveTimeout = $block->getData('auto_save_timeout') ?? $magewire->getAutoSaveTimeout();
 ?>
-<div id="vat-request-status"
-     x-data="initVatButton()"
-     x-init="
-        vatNumber = '<?= $escaper->escapeJs($magewire->address['vat_id'] ?? '')?>';
-        countryId = '<?= $escaper->escapeJs($magewire->address['country_id'] ?? '')?>';
-        autoSaveTime = '<?= $escaper->escapeJs($autoSaveTimeout)?>';
-     "
-     @country-id-changed.window="countryId = $event.detail; resetValidation()"
-     @vat-id-changed.window="validate($event.detail)"
-     @close-vat-message.window="closeMessage()"
->
+<div id="vat-request-status">
     <div class="rounded-sm p-4 my-2 border-gray-200 border"
-         :class="{'bg-green-50': vatIsValid && !isLoading, 'bg-red-50': ! vatIsValid && !isLoading, 'bg-blue-50': isLoading}"
+         :class="getBgClass"
          x-show="showFrontendMessage"
          x-transition
     >
         <div class="flex">
             <div class="flex-shrink-0">
-                <div x-show="!isLoading && vatIsValid" class="text-green-400">
+                <div x-show="isSuccess" class="text-green-400">
                     <?= /* @noEscape */ $heroIcons->checkCircleHtml('h-5 w-5 stroke-green-400') ?>
                 </div>
-                <div x-show="!isLoading && !vatIsValid" class="text-red-400">
+                <div x-show="isFailed" class="text-red-400">
                     <?= /* @noEscape */ $heroIcons->exclamationCircleHtml('h-5 w-5 stroke-red-400') ?>
                 </div>
                 <div x-show="isLoading" class="text-blue-400">
@@ -47,12 +37,12 @@ $autoSaveTimeout = $block->getData('auto_save_timeout') ?? $magewire->getAutoSav
             </div>
             <div class="ml-3">
                 <p x-text="requestMessage"
-                   :class="{'text-green-800': vatIsValid && !isLoading, 'text-red-800': ! vatIsValid && !isLoading, 'text-blue-800': isLoading}"
+                   :class="getFontClass"
                    class="text-sm font-medium"></p>
             </div>
-            <div class="ml-auto cursor-pointer" @click="closeMessage()">
+            <button type="button" class="ml-auto cursor-pointer" @click.stop="closeMessage">
                 <?= /* @noEscape */ $heroIcons->xHtml('h-5 w-5') ?>
-            </div>
+            </button>
         </div>
     </div>
 </div>

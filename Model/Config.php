@@ -20,7 +20,7 @@ class Config
     ) {
     }
 
-    public function isVatIdFieldVisibleForMerchantCountry(int $store = 0): bool
+    public function isVatIdFieldVisibleForMerchantCountry(?int $store = null): bool
     {
         return  $this->scopeConfig->isSetFlag(
             self::DISPLAY_VAT_ID_FOR_DOMESTIC_COUNTRY_PATH,

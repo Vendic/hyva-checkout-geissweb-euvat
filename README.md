@@ -18,6 +18,8 @@ Tested with:
 - Hyvä Checkout 1.1.4
 - Geissweb EUVAT 1.19.1
 
+The package also supports Hyvä Checkout 3.x.
+
 ## See it in action
 
 

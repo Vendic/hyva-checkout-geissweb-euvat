@@ -5,7 +5,6 @@
 
 /** @var \Magento\Framework\Escaper $escaper */
 /** @var \Magento\Framework\View\Element\Template $block */
-/** @var \Hyva\Checkout\Magewire\Checkout\AddressView\AbstractMagewireAddressForm $magewire */
 /** @var \Hyva\Theme\Model\ViewModelRegistry $viewModels */
 
 /** @var \Hyva\Theme\ViewModel\HeroiconsOutline $heroIcons */
@@ -14,8 +13,6 @@ $heroIcons = $viewModels->require(\Hyva\Theme\ViewModel\HeroiconsOutline::class)
 // Note: the JS functions referenced in this alpine component can be found in validation-status-js.phtml.
 // The reason thay are seperated is because this component gets hidden by magewire based on conditions (see
 // ShippingAdddressModifiers). By placing the JS in a seperate file, that's always loaded we avoid any errors.
-
-$autoSaveTimeout = $block->getData('auto_save_timeout') ?? $magewire->getAutoSaveTimeout();
 ?>
 <div id="vat-request-status">
     <div class="rounded-sm p-4 my-2 border-gray-200 border"
